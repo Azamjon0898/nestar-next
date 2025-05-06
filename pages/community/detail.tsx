@@ -21,16 +21,15 @@ import { T } from '../../libs/types/common';
 import EditIcon from '@mui/icons-material/Edit';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { BoardArticle } from '../../libs/types/board-article/board-article';
-import { GET_COMMENTS } from '../../apollo/admin/query';
-import { LIKE_TARGET_BOARD_ARTICLE, CREATE_COMMENT, UPDATE_COMMENT } from '../../apollo/user/mutation';
-import { GET_BOARD_ARTICLE } from '../../apollo/user/query';
+import { CREATE_COMMENT, LIKE_TARGET_BOARD_ARTICLE, UPDATE_COMMENT } from '../../apollo/user/mutation';
+import { GET_BOARD_ARTICLE, GET_COMMENTS } from '../../apollo/user/query';
+import { Messages } from '../../libs/config';
 import {
 	sweetConfirmAlert,
 	sweetMixinErrorAlert,
 	sweetMixinSuccessAlert,
 	sweetTopSmallSuccessAlert,
 } from '../../libs/sweetAlert';
-import { Messages } from '../../libs/config';
 import { CommentUpdate } from '../../libs/types/comment/comment.update';
 const ToastViewerComponent = dynamic(() => import('../../libs/components/community/TViewer'), { ssr: false });
 
@@ -82,7 +81,6 @@ const CommunityDetail: NextPage = ({ initialInput, ...props }: T) => {
 		variables: { input: articleId },
 		notifyOnNetworkStatusChange: true,
 		onCompleted: (data: T) => {
-			console.log(data?.getBoardArticle)
 			setBoardArticle(data?.getBoardArticle);
 			if (data?.getBoardArticle?.memberData?.memberImage) {
 				setMemberImage(`${process.env.REACT_APP_API_URL}/${data?.getBoardArticle?.memberData?.memberImage}`);
@@ -328,6 +326,7 @@ const CommunityDetail: NextPage = ({ initialInput, ...props }: T) => {
 												) : (
 													<ThumbUpOffAltIcon onClick={() => likeBoArticleHandler(user, boardArticle?._id)} />
 												)}
+
 												<Typography className="text">{boardArticle?.articleLikes}</Typography>
 											</Stack>
 											<Stack className="divider"></Stack>
@@ -337,13 +336,9 @@ const CommunityDetail: NextPage = ({ initialInput, ...props }: T) => {
 											</Stack>
 											<Stack className="divider"></Stack>
 											<Stack className="icon-info">
-												{boardArticle?.articleComments && boardArticle?.articleComments > 0 ? (
-													<ChatIcon />
-												) : (
-													<ChatBubbleOutlineRoundedIcon />
-												)}
+												{total > 0 ? <ChatIcon /> : <ChatBubbleOutlineRoundedIcon />}
 
-												<Typography className="text">{boardArticle?.articleComments}</Typography>
+												<Typography className="text">{total}</Typography>
 											</Stack>
 										</Stack>
 									</Stack>
@@ -420,7 +415,7 @@ const CommunityDetail: NextPage = ({ initialInput, ...props }: T) => {
 																<DeleteForeverIcon sx={{ color: '#757575', cursor: 'pointer' }} />
 															</IconButton>
 															<IconButton
-																onClick={(e: T) => {
+																onClick={(e: any) => {
 																	setUpdatedComment(commentData?.commentContent);
 																	setUpdatedCommentWordsCnt(commentData?.commentContent?.length);
 																	setUpdatedCommentId(commentData?._id);

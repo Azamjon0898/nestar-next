@@ -3,7 +3,7 @@ import { Box, Button, Pagination, Stack, Typography } from '@mui/material';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { useRouter } from 'next/router';
 import { FollowInquiry } from '../../types/follow/follow.input';
-import { useQuery, useReactiveVar } from '@apollo/client';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { Follower } from '../../types/follow/follow';
 import { REACT_APP_API_URL } from '../../config';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -48,6 +48,7 @@ const MemberFollowers = (props: MemberFollowsProps) => {
 			}
 		},
 	});
+
 	/** LIFECYCLES **/
 	useEffect(() => {
 		if (router.query.memberId)

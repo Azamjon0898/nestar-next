@@ -3,17 +3,16 @@ import { NextPage } from 'next';
 import { Pagination, Stack, Typography } from '@mui/material';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { PropertyCard } from './PropertyCard';
-import { useQuery, useReactiveVar, useMutation } from '@apollo/client';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { Property } from '../../types/property/property';
 import { AgentPropertiesInquiry } from '../../types/property/property.input';
 import { T } from '../../types/common';
 import { PropertyStatus } from '../../enums/property.enum';
 import { userVar } from '../../../apollo/store';
 import { useRouter } from 'next/router';
+import { UPDATE_PROPERTY } from '../../../apollo/user/mutation';
 import { GET_AGENT_PROPERTIES } from '../../../apollo/user/query';
-import { CREATE_PROPERTY, UPDATE_PROPERTY } from '../../../apollo/user/mutation';
 import { sweetConfirmAlert, sweetErrorHandling } from '../../sweetAlert';
-import { stat } from 'fs';
 
 const MyProperties: NextPage = ({ initialInput, ...props }: any) => {
 	const device = useDeviceDetect();
@@ -24,8 +23,8 @@ const MyProperties: NextPage = ({ initialInput, ...props }: any) => {
 	const router = useRouter();
 
 	/** APOLLO REQUESTS **/
-	
 	const [updateProperty] = useMutation(UPDATE_PROPERTY);
+
 	const {
 		loading: getAgentPropertiesLoading,
 		data: getAgentPropertiesData,
@@ -33,9 +32,7 @@ const MyProperties: NextPage = ({ initialInput, ...props }: any) => {
 		refetch: getAgentPropertiesRefetch,
 	} = useQuery(GET_AGENT_PROPERTIES, {
 		fetchPolicy: 'network-only',
-		variables: {
-			input: searchFilter,
-		},
+		variables: { input: searchFilter },
 		notifyOnNetworkStatusChange: true,
 		onCompleted: (data: T) => {
 			setAgentProperties(data?.getAgentProperties?.list);
@@ -54,7 +51,7 @@ const MyProperties: NextPage = ({ initialInput, ...props }: any) => {
 
 	const deletePropertyHandler = async (id: string) => {
 		try {
-			if (await sweetConfirmAlert(`Are you sure delete this property?`)) {
+			if (await sweetConfirmAlert(' are you sure to delete this property?')) {
 				await updateProperty({
 					variables: {
 						input: {
@@ -63,6 +60,7 @@ const MyProperties: NextPage = ({ initialInput, ...props }: any) => {
 						},
 					},
 				});
+
 				await getAgentPropertiesRefetch({ input: searchFilter });
 			}
 		} catch (err: any) {
@@ -72,7 +70,7 @@ const MyProperties: NextPage = ({ initialInput, ...props }: any) => {
 
 	const updatePropertyHandler = async (status: string, id: string) => {
 		try {
-			if (await sweetConfirmAlert(`Are you sure change to ${status} this property?`)) {
+			if (await sweetConfirmAlert(` are you sure change to ${status} status?`)) {
 				await updateProperty({
 					variables: {
 						input: {

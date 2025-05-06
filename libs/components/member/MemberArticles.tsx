@@ -25,25 +25,30 @@ const MemberArticles: NextPage = ({ initialInput, ...props }: any) => {
 	const [likeTargetBoardArticle] = useMutation(LIKE_TARGET_BOARD_ARTICLE);
 
 	const {
-		loading: boardArticlesLoading,
-		data: boardArticlesData,
-		error: boardArticlesError,
-		refetch: boardArticlesRefetch,
+		loading: getBoardArticlesLoading,
+		data: getBoardArticlesData,
+		error: getBoardArticlesError,
+		refetch: getBoardArticlesRefetch,
 	} = useQuery(GET_BOARD_ARTICLES, {
 		fetchPolicy: 'network-only',
 		variables: { input: searchFilter },
 		notifyOnNetworkStatusChange: true,
 		onCompleted: (data: T) => {
 			setMemberBoArticles(data?.getBoardArticles?.list);
- 			setTotal(data?.getBoardArticles?.metaCounter[0]?.total ?? 0);
+			setTotal(data?.getBoardArticles?.metaCounter[0]?.total ?? 0);
 		},
 	});
+
 	/** LIFECYCLES **/
 	useEffect(() => {
 		if (memberId) setSearchFilter({ ...initialInput, search: { memberId: memberId } });
 	}, [memberId]);
 
 	/** HANDLERS **/
+	const paginationHandler = (e: T, value: number) => {
+		setSearchFilter({ ...searchFilter, page: value });
+	};
+
 	const likeArticleHandler = async (e: any, user: any, boardArticleId: string) => {
 		try {
 			e.stopPropagation();
@@ -52,12 +57,9 @@ const MemberArticles: NextPage = ({ initialInput, ...props }: any) => {
 
 			await likeTargetBoardArticle({ variables: { input: boardArticleId } });
 
-			await boardArticlesRefetch({ input: searchFilter });
+			await getBoardArticlesRefetch({ input: searchFilter });
 			await sweetTopSmallSuccessAlert('Liked', 800);
 		} catch (err: any) {}
-	};
-	const paginationHandler = (e: T, value: number) => {
-		setSearchFilter({ ...searchFilter, page: value });
 	};
 
 	if (device === 'mobile') {

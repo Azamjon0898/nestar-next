@@ -8,8 +8,8 @@ import { Autoplay, Navigation, Pagination } from 'swiper';
 import { Property } from '../../types/property/property';
 import { PropertiesInquiry } from '../../types/property/property.input';
 import TrendPropertyCard from './TrendPropertyCard';
-import { useMutation, useQuery } from '@apollo/client';
 import { GET_PROPERTIES } from '../../../apollo/user/query';
+import { useMutation, useQuery } from '@apollo/client';
 import { T } from '../../types/common';
 import { LIKE_TARGET_PROPERTY } from '../../../apollo/user/mutation';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
@@ -26,6 +26,7 @@ const TrendProperties = (props: TrendPropertiesProps) => {
 
 	/** APOLLO REQUESTS **/
 	const [likeTargetProperty] = useMutation(LIKE_TARGET_PROPERTY);
+
 	const {
 		loading: getPropertiesLoading,
 		data: getPropertiesData,
@@ -33,29 +34,33 @@ const TrendProperties = (props: TrendPropertiesProps) => {
 		refetch: getPropertiesRefetch,
 	} = useQuery(GET_PROPERTIES, {
 		fetchPolicy: 'cache-and-network',
-		variables: {
-			input: initialInput,
-		},
+		variables: { input: initialInput },
 		notifyOnNetworkStatusChange: true,
-		onCompleted: (data: T) => {
+		onCompleted(data: T) {
 			setTrendProperties(data?.getProperties?.list);
 		},
 	});
 
 	/** HANDLERS **/
-
 	const likePropertyHandler = async (user: T, id: string) => {
 		try {
 			if (!id) return;
 			if (!user._id) throw new Error(Message.NOT_AUTHENTICATED);
-			await likeTargetProperty({ variables: { input: id } });
+
+			await likeTargetProperty({
+				variables: { input: id },
+			});
+
 			await getPropertiesRefetch({ input: initialInput });
+
 			await sweetTopSmallSuccessAlert('success', 800);
 		} catch (err: any) {
 			console.log('ERROR, likePropertyHandler:', err.message);
 			sweetMixinErrorAlert(err.message).then();
 		}
 	};
+
+	if (!trendProperties) return null;
 
 	if (device === 'mobile') {
 		return (

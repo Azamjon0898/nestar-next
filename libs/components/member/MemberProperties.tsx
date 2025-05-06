@@ -7,8 +7,8 @@ import { Property } from '../../types/property/property';
 import { PropertiesInquiry } from '../../types/property/property.input';
 import { T } from '../../types/common';
 import { useRouter } from 'next/router';
-import { GET_PROPERTIES } from '../../../apollo/user/query';
 import { useQuery } from '@apollo/client';
+import { GET_PROPERTIES } from '../../../apollo/user/query';
 
 const MyProperties: NextPage = ({ initialInput, ...props }: any) => {
 	const device = useDeviceDetect();
@@ -34,10 +34,12 @@ const MyProperties: NextPage = ({ initialInput, ...props }: any) => {
 			setTotal(data?.getProperties?.metaCounter[0]?.total ?? 0);
 		},
 	});
+
 	/** LIFECYCLES **/
 	useEffect(() => {
 		getPropertiesRefetch().then();
 	}, [searchFilter]);
+
 	useEffect(() => {
 		if (memberId)
 			setSearchFilter({ ...initialInput, search: { ...initialInput.search, memberId: memberId as string } });

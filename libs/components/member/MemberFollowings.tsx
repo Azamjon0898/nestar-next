@@ -21,7 +21,7 @@ interface MemberFollowingsProps {
 }
 
 const MemberFollowings = (props: MemberFollowingsProps) => {
-	const { initialInput, subscribeHandler, unsubscribeHandler, likeMemberHandler, redirectToMemberPageHandler } = props;
+	const { initialInput, subscribeHandler, unsubscribeHandler, redirectToMemberPageHandler, likeMemberHandler } = props;
 	const device = useDeviceDetect();
 	const router = useRouter();
 	const [total, setTotal] = useState<number>(0);
@@ -46,6 +46,7 @@ const MemberFollowings = (props: MemberFollowingsProps) => {
 			setTotal(data?.getMemberFollowings?.metaCounter[0]?.total);
 		},
 	});
+
 	/** LIFECYCLES **/
 	useEffect(() => {
 		if (router.query.memberId)
@@ -109,7 +110,7 @@ const MemberFollowings = (props: MemberFollowingsProps) => {
 										<span>({follower?.followingData?.memberFollowings})</span>
 									</Box>
 									<Box className={'info-box'} component={'div'}>
-									{follower?.meLiked && follower?.meLiked[0]?.myFavorite ? (
+										{follower?.meLiked && follower?.meLiked[0]?.myFavorite ? (
 											<FavoriteIcon
 												color="primary"
 												onClick={() =>

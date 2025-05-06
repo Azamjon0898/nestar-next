@@ -18,9 +18,8 @@ import MemberFollowers from '../../libs/components/member/MemberFollowers';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
 import MemberFollowings from '../../libs/components/member/MemberFollowings';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { subscribe } from 'diagnostics_channel';
+import { LIKE_TARGET_MEMBER, SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
 import { Messages } from '../../libs/config';
-import { SUBSCRIBE, UNSUBSCRIBE, LIKE_TARGET_MEMBER } from '../../apollo/user/mutation';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -38,12 +37,38 @@ const MyPage: NextPage = () => {
 	const [subscribe] = useMutation(SUBSCRIBE);
 	const [unsubscribe] = useMutation(UNSUBSCRIBE);
 	const [likeTargetMember] = useMutation(LIKE_TARGET_MEMBER);
+
 	/** LIFECYCLES **/
 	useEffect(() => {
 		if (!user._id) router.push('/').then();
 	}, [user]);
 
 	/** HANDLERS **/
+	const subscribeHandler = async (id: string, refetch: any, query: any) => {
+		try {
+			if (!id) throw new Error(Messages.error1);
+			if (!user?._id) throw new Error(Messages.error2);
+
+			await subscribe({ variables: { input: id } });
+			await sweetTopSmallSuccessAlert('Subscibed', 800);
+			await refetch({ input: query });
+		} catch (err: any) {
+			sweetErrorHandling(err).then();
+		}
+	};
+
+	const unsubscribeHandler = async (id: string, refetch: any, query: any) => {
+		try {
+			if (!id) throw new Error(Messages.error1);
+			if (!user?._id) throw new Error(Messages.error2);
+
+			await unsubscribe({ variables: { input: id } });
+			await sweetTopSmallSuccessAlert('Unsubscibed', 800);
+			await refetch({ input: query });
+		} catch (err: any) {
+			sweetErrorHandling(err).then();
+		}
+	};
 	const likeMemberHandler = async (id: string, refetch: any, query: any) => {
 		try {
 			if (!id) return;
@@ -55,32 +80,6 @@ const MyPage: NextPage = () => {
 		} catch (err: any) {
 			console.log('likeMemberHandler error', err.message);
 			sweetErrorHandling(err.message).then();
-		}
-	};
-
-	const subscribeHandler = async (id: string, refetch: any, query: any) => {
-		try {
-			if (!id) throw new Error(Messages.error1);
- 			if (!user?._id) throw new Error(Messages.error2);
- 
- 			await subscribe({ variables: { input: id } });
- 			await sweetTopSmallSuccessAlert('Subscibed', 800);
- 			await refetch({ input: query });
-		} catch (err: any) {
-			sweetErrorHandling(err).then();
-		}
-	};
-
-	const unsubscribeHandler = async (id: string, refetch: any, query: any) => {
-		try {
-			if (!id) throw new Error(Messages.error1);
- 			if (!user?._id) throw new Error(Messages.error2);
- 
- 			await unsubscribe({ variables: { input: id } });
- 			await sweetTopSmallSuccessAlert('Unsubscibed', 800);
- 			await refetch({ input: query });
-		} catch (err: any) {
-			sweetErrorHandling(err).then();
 		}
 	};
 

@@ -30,6 +30,7 @@ const RecentlyVisited: NextPage = () => {
 			setTotal(data.getVisited?.metaCounter?.[0]?.total || 0);
 		},
 	});
+
 	/** HANDLERS **/
 	const paginationHandler = (e: T, value: number) => {
 		setSearchVisited({ ...searchVisited, page: value });

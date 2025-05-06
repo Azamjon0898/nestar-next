@@ -7,12 +7,11 @@ import { REACT_APP_API_URL } from '../../config';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { T } from '../../types/common';
-import '@toast-ui/editor/dist/toastui-editor.css';
 import { useMutation } from '@apollo/client';
-
 import { CREATE_BOARD_ARTICLE } from '../../../apollo/user/mutation';
-import { sweetTopSmallSuccessAlert, sweetErrorHandling } from '../../sweetAlert';
+import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../sweetAlert';
 import { Message } from '../../enums/common.enum';
+import '@toast-ui/editor/dist/toastui-editor.css';
 
 const TuiEditor = () => {
 	const editorRef = useRef<Editor>(null),
@@ -22,6 +21,7 @@ const TuiEditor = () => {
 
 	/** APOLLO REQUESTS **/
 	const [createBoardArticle] = useMutation(CREATE_BOARD_ARTICLE);
+
 	const memoizedValues = useMemo(() => {
 		const articleTitle = '',
 			articleContent = '',
@@ -81,7 +81,6 @@ const TuiEditor = () => {
 		memoizedValues.articleTitle = e.target.value;
 	};
 
-	
 	const handleRegisterButton = async () => {
 		try {
 			const editor = editorRef.current;

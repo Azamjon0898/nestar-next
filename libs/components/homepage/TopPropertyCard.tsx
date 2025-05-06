@@ -26,6 +26,7 @@ const TopPropertyCard = (props: TopPropertyCardProps) => {
 		console.log('id', propertyId);
 		await router.push(`property/detail?id=${propertyId}`);
 	};
+
 	if (device === 'mobile') {
 		return (
 			<Stack className="top-card-box">
@@ -68,7 +69,12 @@ const TopPropertyCard = (props: TopPropertyCardProps) => {
 								<RemoveRedEyeIcon />
 							</IconButton>
 							<Typography className="view-cnt">{property?.propertyViews}</Typography>
-							<IconButton color={'default'} onClick={() => likePropertyHandler(user, property?._id)}>
+							<IconButton
+								color={'default'}
+								onClick={() => {
+									likePropertyHandler(user, property?._id);
+								}}
+							>
 								{property?.meLiked && property?.meLiked[0]?.myFavorite ? (
 									<FavoriteIcon style={{ color: 'red' }} />
 								) : (
@@ -123,7 +129,12 @@ const TopPropertyCard = (props: TopPropertyCardProps) => {
 								<RemoveRedEyeIcon />
 							</IconButton>
 							<Typography className="view-cnt">{property?.propertyViews}</Typography>
-							<IconButton color={'default'} onClick={() => likePropertyHandler(user, property?._id)}>
+							<IconButton
+								color={'default'}
+								onClick={() => {
+									likePropertyHandler(user, property?._id);
+								}}
+							>
 								{property?.meLiked && property?.meLiked[0]?.myFavorite ? (
 									<FavoriteIcon style={{ color: 'red' }} />
 								) : (

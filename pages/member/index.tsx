@@ -9,13 +9,12 @@ import { useRouter } from 'next/router';
 import MemberFollowers from '../../libs/components/member/MemberFollowers';
 import MemberArticles from '../../libs/components/member/MemberArticles';
 import { useMutation, useReactiveVar } from '@apollo/client';
+import { userVar } from '../../apollo/store';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
 import MemberFollowings from '../../libs/components/member/MemberFollowings';
-import { userVar } from '../../apollo/store';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { subscribe, unsubscribe } from 'diagnostics_channel';
+import { LIKE_TARGET_MEMBER, SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
 import { Messages } from '../../libs/config';
-import { SUBSCRIBE, UNSUBSCRIBE, LIKE_TARGET_MEMBER } from '../../apollo/user/mutation';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -33,6 +32,7 @@ const MemberPage: NextPage = () => {
 	const [subscribe] = useMutation(SUBSCRIBE);
 	const [unsubscribe] = useMutation(UNSUBSCRIBE);
 	const [likeTargetMember] = useMutation(LIKE_TARGET_MEMBER);
+
 	/** LIFECYCLES **/
 	useEffect(() => {
 		if (!router.isReady) return;
@@ -66,6 +66,7 @@ const MemberPage: NextPage = () => {
 		try {
 			if (!id) throw new Error(Messages.error1);
 			if (!user?._id) throw new Error(Messages.error2);
+
 			await unsubscribe({ variables: { input: id } });
 			await sweetTopSmallSuccessAlert('UnFollowed', 800);
 			await refetch({ input: query });
@@ -138,4 +139,3 @@ const MemberPage: NextPage = () => {
 };
 
 export default withLayoutBasic(MemberPage);
-

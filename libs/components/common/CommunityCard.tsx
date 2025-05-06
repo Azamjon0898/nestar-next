@@ -30,7 +30,6 @@ const CommunityCard = (props: CommunityCardProps) => {
 
 	/** HANDLERS **/
 	const chooseArticleHandler = (e: React.SyntheticEvent, boardArticle: BoardArticle) => {
-		e.preventDefault();
 		router.push(
 			{
 				pathname: '/community/detail',
@@ -53,7 +52,7 @@ const CommunityCard = (props: CommunityCardProps) => {
 			<Stack
 				sx={{ width: size === 'small' ? '285px' : '317px' }}
 				className="community-general-card-config"
-				onClick={(e: any) => chooseArticleHandler(e, boardArticle)}
+				onClick={(e: React.SyntheticEvent) => chooseArticleHandler(e, boardArticle)}
 			>
 				<Stack className="image-box">
 					<img src={imagePath} alt="" className="card-img" />
@@ -62,7 +61,7 @@ const CommunityCard = (props: CommunityCardProps) => {
 					<Stack>
 						<Typography
 							className="desc"
-							onClick={(e: T) => {
+							onClick={(e: React.SyntheticEvent) => {
 								e.stopPropagation();
 								goMemberPage(boardArticle?.memberData?._id as string);
 							}}
@@ -76,7 +75,12 @@ const CommunityCard = (props: CommunityCardProps) => {
 							<RemoveRedEyeIcon />
 						</IconButton>
 						<Typography className="view-cnt">{boardArticle?.articleViews}</Typography>
-						<IconButton color={'default'} onClick={(e: any) => likeArticleHandler(e, user, boardArticle?._id)}>
+						<IconButton
+							color={'default'}
+							onClick={(e: any) => {
+								likeArticleHandler(e, user, boardArticle?._id);
+							}}
+						>
 							{boardArticle?.meLiked && boardArticle?.meLiked[0]?.myFavorite ? (
 								<FavoriteIcon color={'primary'} />
 							) : (

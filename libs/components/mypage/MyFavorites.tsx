@@ -5,10 +5,10 @@ import { Pagination, Stack, Typography } from '@mui/material';
 import PropertyCard from '../property/PropertyCard';
 import { Property } from '../../types/property/property';
 import { T } from '../../types/common';
-import { GET_FAVORITES } from '../../../apollo/user/query';
 import { useMutation, useQuery } from '@apollo/client';
 import { LIKE_TARGET_PROPERTY } from '../../../apollo/user/mutation';
-import { sweetMixinErrorAlert } from '../../sweetAlert';
+import { GET_FAVORITES } from '../../../apollo/user/query';
+import { sweetErrorHandling, sweetMixinErrorAlert } from '../../sweetAlert';
 import { Messages } from '../../config';
 
 const MyFavorites: NextPage = () => {
@@ -36,10 +36,12 @@ const MyFavorites: NextPage = () => {
 			setTotal(data.getFavorites?.metaCounter?.[0]?.total || 0);
 		},
 	});
+
 	/** HANDLERS **/
 	const paginationHandler = (e: T, value: number) => {
 		setSearchFavorites({ ...searchFavorites, page: value });
 	};
+
 	const likePropertyHandler = async (user: any, id: string) => {
 		try {
 			if (!id) return;

@@ -10,12 +10,13 @@ import { PropertiesInquiry } from '../../libs/types/property/property.input';
 import { Property } from '../../libs/types/property/property';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
-import { Direction, Message } from '../../libs/enums/common.enum';
+import { Direction } from '../../libs/enums/common.enum';
 import { useMutation, useQuery } from '@apollo/client';
 import { GET_PROPERTIES } from '../../apollo/user/query';
 import { T } from '../../libs/types/common';
 import { LIKE_TARGET_PROPERTY } from '../../apollo/user/mutation';
-import { sweetTopSmallSuccessAlert, sweetMixinErrorAlert } from '../../libs/sweetAlert';
+import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
+import { Message } from '../../libs/enums/common.enum';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -60,16 +61,17 @@ const PropertyList: NextPage = ({ initialInput, ...props }: any) => {
 	useEffect(() => {
 		if (router.query.input) {
 			const inputObj = JSON.parse(router?.query?.input as string);
+			console.log('++++inputObj', inputObj);
 			setSearchFilter(inputObj);
 		}
 
-		setCurrentPage(searchFilter.page === undefined ? 1 : searchFilter.page);
+		console.log('searchFilter.page', searchFilter.page);
+		setCurrentPage(searchFilter.page === undefined ? 1 : Number(searchFilter.page));
 	}, [router]);
 
 	useEffect(() => {
-		console.log('+++', searchFilter);
-
-		/*getPropertiesRefetch({input:searchFilter}).then(); */
+		console.log('searchFilter', searchFilter);
+		getPropertiesRefetch({ input: searchFilter }).then();
 	}, [searchFilter]);
 
 	/** HANDLERS **/
@@ -89,8 +91,13 @@ const PropertyList: NextPage = ({ initialInput, ...props }: any) => {
 		try {
 			if (!id) return;
 			if (!user._id) throw new Error(Message.NOT_AUTHENTICATED);
-			await likeTargetProperty({ variables: { input: id } });
+
+			await likeTargetProperty({
+				variables: { input: id },
+			});
+
 			await getPropertiesRefetch({ input: initialInput });
+
 			await sweetTopSmallSuccessAlert('success', 800);
 		} catch (err: any) {
 			console.log('ERROR, likePropertyHandler:', err.message);
@@ -180,7 +187,9 @@ const PropertyList: NextPage = ({ initialInput, ...props }: any) => {
 									</div>
 								) : (
 									properties.map((property: Property) => {
-										return <PropertyCard property={property} likePropertyHandler={likePropertyHandler} key={property?._id} />;
+										return (
+											<PropertyCard property={property} key={property?._id} likePropertyHandler={likePropertyHandler} />
+										);
 									})
 								)}
 							</Stack>
@@ -216,7 +225,7 @@ const PropertyList: NextPage = ({ initialInput, ...props }: any) => {
 PropertyList.defaultProps = {
 	initialInput: {
 		page: 1,
-		limit: 3,
+		limit: 9,
 		sort: 'createdAt',
 		direction: 'DESC',
 		search: {

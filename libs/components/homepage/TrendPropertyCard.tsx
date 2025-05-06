@@ -26,6 +26,7 @@ const TrendPropertyCard = (props: TrendPropertyCardProps) => {
 		console.log('id', propertyId);
 		await router.push(`property/detail?id=${propertyId}`);
 	};
+
 	if (device === 'mobile') {
 		return (
 			<Stack className="trend-card-box" key={property._id}>
@@ -67,7 +68,12 @@ const TrendPropertyCard = (props: TrendPropertyCardProps) => {
 								<RemoveRedEyeIcon />
 							</IconButton>
 							<Typography className="view-cnt">{property?.propertyViews}</Typography>
-							<IconButton color={'default'} onClick={() => likePropertyHandler(user, property?._id)}>
+							<IconButton
+								color={'default'}
+								onClick={() => {
+									likePropertyHandler(user, property?._id);
+								}}
+							>
 								{property?.meLiked && property?.meLiked[0]?.myFavorite ? (
 									<FavoriteIcon style={{ color: 'red' }} />
 								) : (
@@ -93,7 +99,7 @@ const TrendPropertyCard = (props: TrendPropertyCardProps) => {
 				</Box>
 				<Box component={'div'} className={'info'}>
 					<strong className={'title'} onClick={() => pushDetailHandler(property._id)}>
-						{property.propertyTitle}
+						{property.propertyTitle}{' '}
 					</strong>
 					<p className={'desc'}>{property.propertyDesc ?? 'no description'}</p>
 					<div className={'options'}>
@@ -121,7 +127,12 @@ const TrendPropertyCard = (props: TrendPropertyCardProps) => {
 								<RemoveRedEyeIcon />
 							</IconButton>
 							<Typography className="view-cnt">{property?.propertyViews}</Typography>
-							<IconButton color={'default'} onClick={() => likePropertyHandler(user, property?._id)}>
+							<IconButton
+								color={'default'}
+								onClick={() => {
+									likePropertyHandler(user, property?._id);
+								}}
+							>
 								{property?.meLiked && property?.meLiked[0]?.myFavorite ? (
 									<FavoriteIcon style={{ color: 'red' }} />
 								) : (

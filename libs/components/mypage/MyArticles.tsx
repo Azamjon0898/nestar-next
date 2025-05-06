@@ -9,6 +9,7 @@ import { T } from '../../types/common';
 import { BoardArticle } from '../../types/board-article/board-article';
 import { LIKE_TARGET_BOARD_ARTICLE } from '../../../apollo/user/mutation';
 import { GET_BOARD_ARTICLES } from '../../../apollo/user/query';
+import { Message } from '../../enums/common.enum';
 import { Messages } from '../../config';
 import { sweetTopSmallSuccessAlert } from '../../sweetAlert';
 
@@ -24,22 +25,27 @@ const MyArticles: NextPage = ({ initialInput, ...props }: T) => {
 
 	/** APOLLO REQUESTS **/
 	const [likeTargetBoardArticle] = useMutation(LIKE_TARGET_BOARD_ARTICLE);
- 
- 	const {
- 		loading: boardArticlesLoading,
- 		data: boardArticlesData,
- 		error: boardArticlesError,
- 		refetch: boardArticlesRefetch,
- 	} = useQuery(GET_BOARD_ARTICLES, {
- 		fetchPolicy: 'network-only',
- 		variables: { input: searchCommunity },
- 		notifyOnNetworkStatusChange: true,
- 		onCompleted: (data: T) => {
- 			setBoardArticles(data?.getBoardArticles?.list);
- 			setTotalCount(data?.getBoardArticles?.metaCounter[0]?.total);
- 		},
- 	});
+
+	const {
+		loading: boardArticlesLoading,
+		data: boardArticlesData,
+		error: boardArticlesError,
+		refetch: boardArticlesRefetch,
+	} = useQuery(GET_BOARD_ARTICLES, {
+		fetchPolicy: 'network-only',
+		variables: { input: searchCommunity },
+		notifyOnNetworkStatusChange: true,
+		onCompleted: (data: T) => {
+			setBoardArticles(data?.getBoardArticles?.list);
+			setTotalCount(data?.getBoardArticles?.metaCounter[0]?.total);
+		},
+	});
+
 	/** HANDLERS **/
+	const paginationHandler = (e: T, value: number) => {
+		setSearchCommunity({ ...searchCommunity, page: value });
+	};
+
 	const likeBoardArticleHandler = async (e: any, user: any, id: string) => {
 		try {
 			e.stopPropagation();
@@ -51,9 +57,6 @@ const MyArticles: NextPage = ({ initialInput, ...props }: T) => {
 
 			await sweetTopSmallSuccessAlert('Success', 700);
 		} catch (err) {}
-	};
-	const paginationHandler = (e: T, value: number) => {
-		setSearchCommunity({ ...searchCommunity, page: value });
 	};
 
 	if (device === 'mobile') {

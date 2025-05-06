@@ -6,11 +6,10 @@ import PropertyBigCard from '../../libs/components/common/PropertyBigCard';
 import ReviewCard from '../../libs/components/agent/ReviewCard';
 import { Box, Button, Pagination, Stack, Typography } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
-import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { useRouter } from 'next/router';
 import { Property } from '../../libs/types/property/property';
 import { Member } from '../../libs/types/member/member';
-import { sweetErrorHandling, sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
+import { sweetErrorHandling } from '../../libs/sweetAlert';
 import { userVar } from '../../apollo/store';
 import { PropertiesInquiry } from '../../libs/types/property/property.input';
 import { CommentInput, CommentsInquiry } from '../../libs/types/comment/comment.input';
@@ -18,11 +17,12 @@ import { Comment } from '../../libs/types/comment/comment';
 import { CommentGroup } from '../../libs/enums/comment.enum';
 import { REACT_APP_API_URL } from '../../libs/config';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { GET_COMMENTS, GET_MEMBER, GET_PROPERTIES } from '../../apollo/user/query';
-import { Direction, Message } from '../../libs/enums/common.enum';
+import { CREATE_COMMENT, LIKE_TARGET_MEMBER, LIKE_TARGET_PROPERTY } from '../../apollo/user/mutation';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
+import { GET_AGENTS, GET_COMMENTS, GET_MEMBER, GET_PROPERTIES } from '../../apollo/user/query';
 import { T } from '../../libs/types/common';
-import property from '../property';
-import { LIKE_TARGET_PROPERTY, CREATE_COMMENT } from '../../apollo/user/mutation';
+import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
+import { Messages } from '../../libs/config';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -49,8 +49,9 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 	});
 
 	/** APOLLO REQUESTS **/
-	const [likeTargetProperty] = useMutation(LIKE_TARGET_PROPERTY);
 	const [createComment] = useMutation(CREATE_COMMENT);
+	const [likeTargetProperty] = useMutation(LIKE_TARGET_PROPERTY);
+
 	const {
 		loading: getMemberLoading,
 		data: getMemberData,
@@ -60,21 +61,10 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 		fetchPolicy: 'network-only',
 		variables: { input: agentId },
 		skip: !agentId,
-		notifyOnNetworkStatusChange: true,
-		onCompleted(data: T) {
+		onCompleted: (data: T) => {
 			setAgent(data?.getMember);
-			setSearchFilter({
-				...searchFilter,
-				search: {
-					memberId: data?.getMember?._id,
-				},
-			});
-			setCommentInquiry({
-				...commentInquiry,
-				search: {
-					commentRefId: data?.getMember?._id,
-				},
-			});
+			setSearchFilter({ ...searchFilter, search: { memberId: data?.getMember?._id } });
+			setCommentInquiry({ ...commentInquiry, search: { commentRefId: data?.getMember?._id } });
 			setInsertCommentData({
 				...insertCommentData,
 				commentRefId: data?.getMember?._id,
@@ -92,7 +82,7 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 		variables: { input: searchFilter },
 		skip: !searchFilter.search.memberId,
 		notifyOnNetworkStatusChange: true,
-		onCompleted(data: T) {
+		onCompleted: (data: T) => {
 			setAgentProperties(data?.getProperties?.list);
 			setPropertyTotal(data?.getProperties?.metaCounter[0]?.total ?? 0);
 		},
@@ -108,8 +98,7 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 		variables: { input: commentInquiry },
 		skip: !commentInquiry.search.commentRefId,
 		notifyOnNetworkStatusChange: true,
-
-		onCompleted(data: T) {
+		onCompleted: (data: T) => {
 			setAgentComments(data?.getComments?.list);
 			setCommentTotal(data?.getComments?.metaCounter[0]?.total ?? 0);
 		},
@@ -125,6 +114,7 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 			getPropertiesRefetch({ variables: { input: searchFilter } }).then();
 		}
 	}, [searchFilter]);
+
 	useEffect(() => {
 		if (commentInquiry.search.commentRefId) {
 			getCommentsRefetch({ variables: { input: commentInquiry } }).then();
@@ -132,41 +122,6 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 	}, [commentInquiry]);
 
 	/** HANDLERS **/
-
-	const likePropertyHandler = async (user: T, id: string) => {
-		try {
-			//execute getPropertiesRefetch
-			if (!id) return;
-			if (!user._id) throw new Error(Message.NOT_AUTHENTICATED);
-			//likeTargetProperty Mutation
-			await likeTargetProperty({
-				variables: { input: id },
-			});
-
-			await getPropertiesRefetch({
-				input: searchFilter,
-			});
-
-			await sweetTopSmallSuccessAlert('success', 800);
-		} catch (err: any) {
-			console.log('ERROR, likeTargetPropertyHandler', err.message);
-			sweetMixinErrorAlert(err.message).then();
-		}
-	};
-	const createCommentHandler = async () => {
-		try {
-			if (!user._id) throw new Error(Message.NOT_AUTHENTICATED);
-			if (user._id === agentId) throw new Error('You can not write a review for yourself');
-			await createComment({ variables: { input: insertCommentData } });
-
-			setInsertCommentData({ ...insertCommentData, commentContent: '' });
-
-			await getCommentsRefetch({ input: commentInquiry });
-		} catch (err: any) {
-			await sweetErrorHandling(err);
-		}
-	};
-
 	const redirectToMemberPageHandler = async (memberId: string) => {
 		try {
 			if (memberId === user?._id) await router.push(`/mypage?memberId=${memberId}`);
@@ -184,6 +139,38 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 	const commentPaginationChangeHandler = async (event: ChangeEvent<unknown>, value: number) => {
 		commentInquiry.page = value;
 		setCommentInquiry({ ...commentInquiry });
+	};
+
+	const createCommentHandler = async () => {
+		try {
+			if (!user._id) throw new Error(Messages.error2);
+			if (user._id === agentId) throw new Error('Cannot write a review for yourself');
+
+			await createComment({ variables: { input: insertCommentData } });
+			setInsertCommentData({ ...insertCommentData, commentContent: '' });
+
+			await getCommentsRefetch({ input: commentInquiry });
+		} catch (err: any) {
+			sweetErrorHandling(err).then();
+		}
+	};
+
+	const likePropertyHandler = async (user: T, id: string) => {
+		try {
+			if (!id) return;
+			if (!user._id) throw new Error(Messages.error2);
+
+			await likeTargetProperty({
+				variables: { input: id },
+			});
+
+			await getPropertiesRefetch({ input: searchFilter });
+
+			await sweetTopSmallSuccessAlert('success', 800);
+		} catch (err: any) {
+			console.log('ERROR, likePropertyHandler:', err.message);
+			sweetMixinErrorAlert(err.message).then();
+		}
 	};
 
 	if (device === 'mobile') {
@@ -212,8 +199,8 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 									<div className={'wrap-main'} key={property?._id}>
 										<PropertyBigCard
 											property={property}
-											likePropertyHandler={likePropertyHandler}
 											key={property?._id}
+											likePropertyHandler={likePropertyHandler}
 										/>
 									</div>
 								);
