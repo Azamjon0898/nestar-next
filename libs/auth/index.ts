@@ -184,4 +184,3 @@ const deleteUserInfo = () => {
 		memberBlocks: 0,
 	});
 };
-
